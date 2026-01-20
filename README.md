@@ -1,5 +1,7 @@
 # LinkedChain
 
+[![npm version](https://img.shields.io/npm/v/linked-chain.svg?style=flat-square)](https://www.npmjs.com/package/linked-chain)
+
 **A Temporal, Node-Based Graph Data Structure for TypeScript.**
 
 ---
