@@ -1,0 +1,12 @@
+{
+  "name": "linked-chain",
+  "module": "src/linked-chain.ts",
+  "description": "A self-aware, time-traveling graph data structure for TypeScript.",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
