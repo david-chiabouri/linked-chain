@@ -45,6 +45,11 @@ project.update({
     data: { ...project.data()!, status: "completed", completion: 100 }
 });
 
+// 4b. Mark this final state as a snapshot/milestone
+console.log("\n[4b] Marking as crucial milestone (snapshot)...");
+project.set_if_snapshot(true);
+console.log("Is Snapshot?", project.is_snapshot());
+
 console.log("\nFinal State:", project.data());
 
 // 5. Inspect History

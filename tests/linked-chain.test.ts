@@ -104,7 +104,7 @@ describe("LinkedChain", () => {
         expect(branch).not.toBe(chain);
         expect(branch.data()).toEqual({ value: 10 });
         expect(branch.metadata().title).toContain("Branch");
-        expect(branch.origin()).toBe(chain.origin());
+        expect(branch.origin()).toBe(chain.origin() ?? chain);
     });
 
     test("find method should locate nodes", () => {
@@ -112,13 +112,13 @@ describe("LinkedChain", () => {
         const node2 = node1.new_next_link({ value: 2, name: "middle" });
         const node3 = node2.new_next_link({ value: 3, name: "end" });
 
-        const found = node1.find(n => n.data()?.name === "end");
+        const found = node1.find(data => data.name === "end");
         expect(found).toBe(node3);
 
-        const notFound = node1.find(n => n.data()?.name === "missing");
+        const notFound = node1.find(data => data.name === "missing");
         expect(notFound).toBeUndefined();
 
-        const backwardFind = node3.find(n => n.data()?.name === "start");
+        const backwardFind = node3.find(data => data.name === "start");
         expect(backwardFind).toBe(node1);
     });
 

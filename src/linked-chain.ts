@@ -119,32 +119,49 @@ export default class LinkedChain<T> {
     }
 
     /**
+     * Sets the is_snapshot property of this link.
+     * @param new_snapshot The new is_snapshot value.
+     * @returns The updated instance (chainable).
+     */
+    public set_if_snapshot(new_snapshot: boolean): LinkedChain<T> {
+        this._is_snapshot = new_snapshot;
+        return this;
+    }
+
+
+    /**
      * Updates the state of this link (data, metadata, relationships) and records the change in history.
      * @param data Partial ingredients to update.
      * @returns The updated instance (chainable).
      */
     public update(data: LinkedChainIngredients<T>): LinkedChain<T> {
         // We capture state changes for history recording
-        const had_data = data.data !== undefined;
-        const had_meta = data.metadata !== undefined;
+        const has_data = data.data !== undefined;
+        const has_meta = data.metadata !== undefined;
+        const is_snapshot = data.is_snapshot !== undefined;
 
-        if (had_meta && data.metadata) this.update_metadata(data.metadata); // Handles its own history entry if called directly, but we want one atomic entry? 
+        if (has_meta && data.metadata) this.update_metadata(data.metadata); // Handles its own history entry if called directly, but we want one atomic entry? 
         // Logic fix: update_metadata calls add_entry. If we call it here, we get two entries if we also add_entry at the end.
         // Better pattern: Apply all changes then call add_entry ONCE.
 
         // Let's modify the internal state first.
-        if (data.metadata) {
-            this._metadata = {
-                id: data.metadata.id ?? this.metadata().id,
-                title: data.metadata.title ?? this.metadata().title,
-                description: data.metadata.description ?? this.metadata().description,
-                extra: data.metadata.extra ?? this.metadata().extra
+        if (has_meta) {
+            let md = {
+                id: data?.metadata?.id ?? this.metadata().id,
+                title: data?.metadata?.title ?? this.metadata().title,
+                description: data?.metadata?.description ?? this.metadata().description,
+                extra: data?.metadata?.extra ?? this.metadata().extra
             };
+            this.update_metadata(md);
         }
 
-        if (data.data !== undefined) this._data = data.data;
+        if (has_data) this._data = data.data;
         if (data.next !== undefined) this.set_next(data.next, false); // false to suppress history add inside setter
         if (data.parent !== undefined) this.set_previous(data.parent, false);
+        if (data.origin !== undefined) this.set_origin(data.origin, false);
+        if (is_snapshot) this.set_if_snapshot(data?.is_snapshot ?? false);
+
+
 
         this.history().add_entry(this);
         return this;
@@ -162,6 +179,17 @@ export default class LinkedChain<T> {
             extra: new_metadata.extra ?? this.metadata().extra
         };
         this.history().add_entry(this);
+        return this;
+    }
+
+    /**
+     * Sets the origin of this link.
+     * @param new_origin The new origin link.
+     * @param record_history Whether to record this change in history (default true).
+     */
+    public set_origin(new_origin: LinkedChain<T>, record_history: boolean = true): LinkedChain<T> {
+        this._origin = new_origin;
+        if (record_history) this.history().add_entry(this);
         return this;
     }
 
@@ -267,18 +295,23 @@ export default class LinkedChain<T> {
      * Searches up and down the linear chain for a node matching the predicate.
      * @param predicate Function that returns true for the desired node.
      */
-    public find(predicate: (node: LinkedChain<T>) => boolean): LinkedChain<T> | undefined {
-        if (predicate(this)) return this;
+    public find(predicate: (node: T) => boolean): LinkedChain<T> | undefined {
+        const d = this.data();
+        if (d && predicate(d)) return this;
         // Search forward
         for (const node of this.iterate('next')) {
-            if (predicate(node)) return node;
+            const nd = node.data();
+            if (nd && predicate(nd)) return node;
         }
         // Search backward
         for (const node of this.iterate('previous')) {
-            if (predicate(node)) return node;
+            const nd = node.data();
+            if (nd && predicate(nd)) return node;
         }
         return undefined;
     }
+
+
 
     /**
      * Detects if the chain contains a cycle using the Floyd's Cycle-Finding Algorithm (Tortoise and Hare).

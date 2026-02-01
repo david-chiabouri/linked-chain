@@ -173,6 +173,9 @@ class ChronoGame {
             metadata: { title: `Turn ${current.turn + 1}: DEATH` }
         });
 
+        // Mark this fatal state as a snapshot point (a "bad ending")
+        this.chain.set_if_snapshot(true);
+
         // 2. Scan History for a safe spot
         // Strategy: Go back to the start of the combat (or 2 turns ago)
         const history = this.chain.history().timeline();

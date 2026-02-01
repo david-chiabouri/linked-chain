@@ -28,6 +28,12 @@ project.update({
 });
 ```
 
+### Snapshots
+You can mark specific states as snapshots using `set_if_snapshot(true)`.
+```typescript
+project.set_if_snapshot(true);
+```
+
 ## Running the Example
 Execute the script with:
 ```bash

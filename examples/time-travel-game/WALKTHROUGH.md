@@ -10,7 +10,7 @@ The `time-travel-game.ts` script is a high-fidelity "Roguelike Time-Looper" simu
 ## Gameplay Loop
 1.  **Exploration**: The hero enters the dungeon.
 2.  **Combat**: The hero fights a Dragon. Each attack is a chain update.
-3.  **Death**: The Dragon deals a fatal blow.
+3.  **Death**: The Dragon deals a fatal blow. The state is marked as a snapshot (bad end).
 4.  **Chrono-Trigger**: 
     - The death handler pauses execution.
     - It scans the `LinkedChainHistory` backwards.
