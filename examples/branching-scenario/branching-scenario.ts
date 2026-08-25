@@ -56,10 +56,6 @@ console.log("Alternate Doc:", alternateDraft.data());
 // Verify lineage
 console.log("\nLineage Check:");
 console.log("Main Doc Ancestors:", doc.ancestors().size); // Should be 0 direct parents (it's linear updates on same object)
-// Actually, 'ancestors' in LinkedChain refers to GRAPH PARENTS (previous links), not history states.
-// Since we didn't use `new_next_link`, the 'doc' variable IS the chain node.
-// 'branch_from_history' creates a new INDEPENDENT chain node starting from that state.
-// It shares the same 'origin' (genesis) but is not linked via 'previous'/'next' automatically.
-// This matches how Git branches diverge.
+
 
 console.log("Branches from Main Doc:", alternateDraft.origin() === doc);

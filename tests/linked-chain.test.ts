@@ -153,4 +153,32 @@ describe("LinkedChain", () => {
         expect(data.set).toBeInstanceOf(Set);
         expect(data.map.get('a')).toBe(1);
     });
+
+    test("should unlink node correctly and update progeny/ancestors", () => {
+        const node1 = chain;
+        const node2 = node1.new_next_link({ value: 1 });
+        const node3 = node2.new_next_link({ value: 2 });
+        
+        // Unlink node2
+        node2.unlink();
+
+        // node1 next should be node3
+        expect(node1.next()).toBe(node3);
+        // node3 previous should be node1
+        expect(node3.previous()).toBe(node1);
+
+        // node1 progeny should not have node2 but should have node3
+        expect(node1.progeny().has(node2)).toBeFalse();
+        expect(node1.progeny().has(node3)).toBeTrue();
+
+        // node3 ancestors should not have node2 but should have node1
+        expect(node3.ancestors().has(node2)).toBeFalse();
+        expect(node3.ancestors().has(node1)).toBeTrue();
+
+        // node2 should be completely isolated
+        expect(node2.previous()).toBeNull();
+        expect(node2.next()).toBeNull();
+        expect(node2.progeny().size).toBe(0);
+        expect(node2.ancestors().size).toBe(0);
+    });
 });

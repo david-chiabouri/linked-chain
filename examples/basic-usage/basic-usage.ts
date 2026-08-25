@@ -4,14 +4,18 @@ import LinkedChain from "../../src/linked-chain";
 /**
  * Basic Usage Example
  * Demonstrates:
- * 1. Creating a chain node
- * 2. Updating data (automatically tracking history)
- * 3. Viewing the history timeline
+ * i. Creating a chain node
+ * ii. Updating data (automatically tracking history)
+ * iii. Viewing the history timeline
+ * iv. Changing project origin
+ * v. Linking to another chain
+ * vi. Unlinking from a chain
+ * vii. Circular linking
  */
 
 console.log("--- Basic Usage Example ---");
 
-// 1. Create a "Project" node
+// i. Create a "Project" node
 interface ProjectState {
     name?: string;
     status: "planning" | "in-progress" | "completed";
@@ -19,40 +23,38 @@ interface ProjectState {
 }
 
 const project = new LinkedChain<ProjectState>({
-    data: { name: "My Super App", status: "planning", completion: 0 },
-    metadata: { title: "Project Root", id: "proj-001" }
+    data: { name: "My Super App Template", status: "planning", completion: 0 },
+    metadata: { title: "Project Root of Some Day", id: "proj-001" }
 });
 
 console.log("\n[1] Created Project:");
 console.log(project.data());
 
-// 2. Start working on it
+// ii. Start working on it
 console.log("\n[2] Updating status to 'in-progress'...");
 project.update({
     data: { ...project.data()!, status: "in-progress", completion: 10 }
 });
 
-// 3. Make some progress
 console.log("\n[3] Making progress (completion: 50%)...");
 project.update({
     data: { ...project.data()!, status: "in-progress", completion: 50 },
     metadata: { description: "Halfway there!" }
 });
 
-// 4. Finish the project
 console.log("\n[4] Completing project...");
 project.update({
     data: { ...project.data()!, status: "completed", completion: 100 }
 });
 
-// 4b. Mark this final state as a snapshot/milestone
-console.log("\n[4b] Marking as crucial milestone (snapshot)...");
+
+// iii. Inspect History
+console.log("\n[4a] Marking as crucial milestone (snapshot)...");
 project.set_if_snapshot(true);
 console.log("Is Snapshot?", project.is_snapshot());
 
 console.log("\nFinal State:", project.data());
 
-// 5. Inspect History
 console.log("\n[5] History Timeline:");
 const history = project.history().timeline();
 history.forEach((entry, index) => {
@@ -62,3 +64,23 @@ history.forEach((entry, index) => {
         entry.checkpoint ? "[Checkpoint]" : ""
     );
 });
+
+// iv. Change project origin
+console.log("\n[6] Changing project origin...");
+console.log("\n[6a] Current Project Origin:", project.origin()?.data());
+const next_day = new LinkedChain<ProjectState>({
+    data: { name: "Template Random Chain", status: "planning", completion: 0 },
+    metadata: { title: "Template of Day [...]", id: "proj-000" }
+});
+console.log("\n[6b] Next Day Chain:", next_day.data());
+project.update({
+    origin: next_day,
+    data: { status: "in-progress", completion: 10 },
+    metadata: { title: "New project of Day [...]", id: "proj-002" }
+});
+console.log("\n[6c] New Project Origin:", project.origin()?.data());
+
+// v. Linking to another chain
+console.log("\n[7] Linking to another chain...");
+next_day.link_previous(project);
+console.log("\n[7a] Linked Project:", next_day.previous()?.data());

@@ -419,6 +419,41 @@ export default class LinkedChain<T> {
     }
 
     /**
+     * Removes this node from the linked list, connecting its previous and next nodes directly.
+     * The node itself remains in memory and history, but is no longer part of the active chain sequence.
+     * @returns The origin chain.
+     */
+    public unlink(): LinkedChain<T> | null {
+        const prev = this.previous();
+        const nxt = this.next();
+
+        // Disconnect from all ancestors
+        for (const ancestor of this._ancestors) {
+            ancestor.progeny().delete(this);
+            if (ancestor.next() === this) {
+                ancestor.set_next(nxt, true);
+            }
+        }
+
+        // Disconnect from all progeny
+        for (const progeny of this._progeny) {
+            progeny.ancestors().delete(this);
+            if (progeny.previous() === this) {
+                progeny.set_previous(prev, true);
+            }
+        }
+
+        this._previous = null;
+        this._next = null;
+        this._ancestors.clear();
+        this._progeny.clear();
+
+        this.history().add_entry(this);
+
+        return this.origin() ?? null;
+    }
+
+    /**
      * Reverts the current data state to match a historical point.
      * This modifies the current instance in-place to look like the past.
      * @param index The index in the history timeline to revert to.
